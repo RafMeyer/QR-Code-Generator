@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Simple QR code generator for text, links, Wi-Fi, email and phone numbers.">
+  <title>QR Code Generator</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#f5f7fb;
+      --panel:rgba(255,255,255,.9);
+      --solid:#fff;
+      --text:#111827;
+      --muted:#667085;
+      --line:#e5e7eb;
+      --accent:#315efb;
+      --accent2:#7c3aed;
+      --danger:#dc2626;
+      --shadow:0 24px 70px rgba(24,39,75,.13);
+    }
+
+    [data-theme="dark"]{
+      --bg:#0a0f1d;
+      --panel:rgba(17,24,39,.9);
+      --solid:#111827;
+      --text:#f8fafc;
+      --muted:#9ca3af;
+      --line:#263245;
+      --accent:#7693ff;
+      --accent2:#a78bfa;
+      --danger:#fb7185;
+      --shadow:0 24px 70px rgba(0,0,0,.36);
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 10% 10%,rgba(49,94,251,.17),transparent 32%),
+        radial-gradient(circle at 90% 90%,rgba(124,58,237,.14),transparent 32%),
+        var(--bg);
+    }
+
+    button,input,textarea,select{font:inherit}
+
+    .page{
+      width:min(1100px,calc(100% - 28px));
+      margin:0 auto;
+      padding:28px 0 44px;
+    }
+
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:22px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .logo{
+      width:48px;
+      height:48px;
+      display:grid;
+      place-items:center;
+      border-radius:16px;
+      color:white;
+      font-size:24px;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      box-shadow:0 12px 28px rgba(49,94,251,.28);
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(1.45rem,4vw,2.15rem);
+      letter-spacing:-.04em;
+    }
+
+    .subtitle{
+      margin:3px 0 0;
+      color:var(--muted);
+      font-size:.9rem;
+    }
+
+    .theme-button{
+      border:1px solid var(--line);
+      background:var(--panel);
+      color:var(--text);
+      width:44px;
+      height:44px;
+      border-radius:14px;
+      cursor:pointer;
+      box-shadow:var(--shadow);
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:1.08fr .92fr;
+      gap:22px;
+      align-items:start;
+    }
+
+    .card{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:26px;
+      padding:22px;
+      backdrop-filter:blur(16px);
+      box-shadow:var(--shadow);
+    }
+
+    .card + .card{margin-top:22px}
+
+    .section-title{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .section-title h2{
+      margin:0;
+      font-size:1.1rem;
+    }
+
+    .badge{
+      color:var(--accent);
+      background:rgba(49,94,251,.09);
+      border:1px solid rgba(49,94,251,.18);
+      padding:5px 9px;
+      border-radius:999px;
+      font-size:.75rem;
+      font-weight:700;
+    }
+
+    .tabs{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-bottom:18px;
+    }
+
+    .tab{
+      border:1px solid var(--line);
+      background:var(--solid);
+      color:var(--text);
+      border-radius:999px;
+      padding:9px 12px;
+      cursor:pointer;
+    }
+
+    .tab.active{
+      color:white;
+      border-color:transparent;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+    }
+
+    .field{margin-bottom:15px}
+
+    .field label{
+      display:block;
+      color:var(--muted);
+      font-size:.84rem;
+      margin-bottom:7px;
+    }
+
+    .input,textarea,select{
+      width:100%;
+      color:var(--text);
+      background:var(--solid);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px 13px;
+      outline:none;
+    }
+
+    textarea{
+      min-height:120px;
+      resize:vertical;
+    }
+
+    .grid-2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .options{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-top:12px;
+    }
+
+    .option-box{
+      border:1px solid var(--line);
+      background:var(--solid);
+      border-radius:15px;
+      padding:12px;
+    }
+
+    .option-box label{
+      display:block;
+      color:var(--muted);
+      font-size:.78rem;
+      margin-bottom:6px;
+    }
+
+    input[type="color"]{
+      width:100%;
+      height:42px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:var(--solid);
+      padding:4px;
+      cursor:pointer;
+    }
+
+    input[type="range"]{
+      width:100%;
+      accent-color:var(--accent);
+    }
+
+    .primary{
+      width:100%;
+      border:0;
+      border-radius:16px;
+      padding:14px 16px;
+      margin-top:18px;
+      color:white;
+      font-weight:800;
+      cursor:pointer;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      box-shadow:0 12px 28px rgba(49,94,251,.24);
+    }
+
+    .secondary{
+      border:1px solid var(--line);
+      background:var(--solid);
+      color:var(--text);
+      border-radius:13px;
+      padding:10px 12px;
+      cursor:pointer;
+    }
+
+    .danger{
+      border:1px solid rgba(220,38,38,.25);
+      background:transparent;
+      color:var(--danger);
+      border-radius:12px;
+      padding:9px 11px;
+      cursor:pointer;
+    }
+
+    .preview-wrap{
+      display:grid;
+      place-items:center;
+      min-height:360px;
+      border:1px dashed var(--line);
+      border-radius:20px;
+      background:var(--solid);
+      padding:20px;
+    }
+
+    canvas{
+      max-width:100%;
+      height:auto!important;
+      border-radius:8px;
+    }
+
+    .preview-actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:14px;
+    }
+
+    .status{
+      min-height:20px;
+      margin-top:12px;
+      color:var(--muted);
+      text-align:center;
+      font-size:.84rem;
+    }
+
+    .history{
+      display:grid;
+      gap:9px;
+    }
+
+    .history-item{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:10px;
+      align-items:center;
+      border:1px solid var(--line);
+      background:var(--solid);
+      border-radius:14px;
+      padding:10px 12px;
+    }
+
+    .history-text{
+      min-width:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      font-size:.86rem;
+    }
+
+    .empty{
+      color:var(--muted);
+      text-align:center;
+      padding:10px 0;
+    }
+
+    .footer{
+      margin-top:18px;
+      text-align:center;
+      color:var(--muted);
+      font-size:.78rem;
+    }
+
+    @media(max-width:880px){
+      .layout{grid-template-columns:1fr}
+    }
+
+    @media(max-width:580px){
+      .page{width:min(100% - 18px,1100px);padding-top:16px}
+      .grid-2,.options,.preview-actions{grid-template-columns:1fr}
+      .card{padding:17px;border-radius:21px}
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <header>
+      <div class="brand">
+        <div class="logo">▦</div>
+        <div>
+          <h1>QR Code Generator</h1>
+          <p class="subtitle">Create and download QR codes instantly.</p>
+        </div>
+      </div>
+
+      <button class="theme-button" id="themeButton" aria-label="Change theme">🌙</button>
+    </header>
+
+    <div class="layout">
+      <div>
+        <section class="card">
+          <div class="section-title">
+            <h2>Create your QR code</h2>
+            <span class="badge">No login</span>
+          </div>
+
+          <div class="tabs">
+            <button class="tab active" data-type="text">Text</button>
+            <button class="tab" data-type="url">Website</button>
+            <button class="tab" data-type="wifi">Wi-Fi</button>
+            <button class="tab" data-type="email">Email</button>
+            <button class="tab" data-type="phone">Phone</button>
+          </div>
+
+          <div id="dynamicFields"></div>
+
+          <div class="options">
+            <div class="option-box">
+              <label>QR size: <span id="sizeValue">320</span> px</label>
+              <input id="sizeRange" type="range" min="180" max="900" step="20" value="320">
+            </div>
+
+            <div class="option-box">
+              <label>Error correction</label>
+              <select id="errorLevel">
+                <option value="L">Low</option>
+                <option value="M" selected>Medium</option>
+                <option value="Q">High</option>
+                <option value="H">Maximum</option>
+              </select>
+            </div>
+
+            <div class="option-box">
+              <label>QR colour</label>
+              <input id="darkColor" type="color" value="#111827">
+            </div>
+
+            <div class="option-box">
+              <label>Background colour</label>
+              <input id="lightColor" type="color" value="#ffffff">
+            </div>
+          </div>
+
+          <button class="primary" id="generateButton">Generate QR code</button>
+        </section>
+      </div>
+
+      <div>
+        <section class="card">
+          <div class="section-title">
+            <h2>Preview</h2>
+            <span class="badge" id="typeBadge">TEXT</span>
+          </div>
+
+          <div class="preview-wrap">
+            <canvas id="qrCanvas"></canvas>
+          </div>
+
+          <div class="preview-actions">
+            <button class="secondary" id="downloadButton">Download PNG</button>
+            <button class="secondary" id="copyButton">Copy content</button>
+          </div>
+
+          <div class="status" id="status">Ready.</div>
+        </section>
+
+        <section class="card">
+          <div class="section-title">
+            <h2>Recent QR codes</h2>
+            <button class="danger" id="clearHistory">Clear</button>
+          </div>
+
+          <div id="historyList" class="history"></div>
+        </section>
+      </div>
+    </div>
+
+    <div class="footer">
+      No Supabase • No account • No upload • Everything stays in your browser
+    </div>
+  </main>
+
+  <script>
+    const $ = id => document.getElementById(id);
+
+    let currentType = "text";
+    let currentData = "";
+
+    const templates = {
+      text: `
+        <div class="field">
+          <label>Text</label>
+          <textarea id="textValue">Hello from Luxembourg!</textarea>
+        </div>
+      `,
+      url: `
+        <div class="field">
+          <label>Website URL</label>
+          <input class="input" id="urlValue" type="url" value="https://rafmeyer.github.io/">
+        </div>
+      `,
+      wifi: `
+        <div class="grid-2">
+          <div class="field">
+            <label>Network name</label>
+            <input class="input" id="wifiName" type="text" placeholder="My Wi-Fi">
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input class="input" id="wifiPassword" type="text" placeholder="Wi-Fi password">
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label>Security</label>
+            <select id="wifiSecurity">
+              <option value="WPA">WPA / WPA2 / WPA3</option>
+              <option value="WEP">WEP</option>
+              <option value="nopass">No password</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Hidden network</label>
+            <select id="wifiHidden">
+              <option value="false">No</option>
+              <option value="true">Yes</option>
+            </select>
+          </div>
+        </div>
+      `,
+      email: `
+        <div class="field">
+          <label>Email address</label>
+          <input class="input" id="emailTo" type="email" placeholder="hello@example.com">
+        </div>
+
+        <div class="field">
+          <label>Subject</label>
+          <input class="input" id="emailSubject" type="text" placeholder="Hello">
+        </div>
+
+        <div class="field">
+          <label>Message</label>
+          <textarea id="emailBody" placeholder="Write your message..."></textarea>
+        </div>
+      `,
+      phone: `
+        <div class="field">
+          <label>Phone number</label>
+          <input class="input" id="phoneValue" type="tel" placeholder="+352 000 000 000">
+        </div>
+      `
+    };
+
+    function escapeWifi(value){
+      return String(value).replace(/([\\;,":])/g,"\\$1");
+    }
+
+    function buildData(){
+      if(currentType==="url") return $("urlValue").value.trim();
+
+      if(currentType==="wifi"){
+        return `WIFI:T:${$("wifiSecurity").value};S:${escapeWifi($("wifiName").value)};P:${escapeWifi($("wifiPassword").value)};H:${$("wifiHidden").value};;`;
+      }
+
+      if(currentType==="email"){
+        return `mailto:${$("emailTo").value.trim()}?subject=${encodeURIComponent($("emailSubject").value)}&body=${encodeURIComponent($("emailBody").value)}`;
+      }
+
+      if(currentType==="phone"){
+        return `tel:${$("phoneValue").value.trim()}`;
+      }
+
+      return $("textValue").value;
+    }
+
+    function renderFields(){
+      $("dynamicFields").innerHTML=templates[currentType];
+      $("typeBadge").textContent=currentType.toUpperCase();
+
+      $("dynamicFields").querySelectorAll("input,textarea,select").forEach(el=>{
+        el.addEventListener("input",()=>generateQR(false));
+        el.addEventListener("change",()=>generateQR(false));
+      });
+    }
+
+    async function generateQR(save){
+      const data=buildData();
+
+      if(!data.trim()){
+        $("status").textContent="Enter some content first.";
+        return;
+      }
+
+      currentData=data;
+
+      try{
+        await QRCode.toCanvas($("qrCanvas"),data,{
+          width:Number($("sizeRange").value),
+          margin:2,
+          errorCorrectionLevel:$("errorLevel").value,
+          color:{
+            dark:$("darkColor").value,
+            light:$("lightColor").value
+          }
+        });
+
+        $("status").textContent="QR code generated successfully.";
+
+        if(save){
+          let history=JSON.parse(localStorage.getItem("qrHistory")||"[]");
+          history=[
+            {type:currentType,data},
+            ...history.filter(item=>item.data!==data)
+          ].slice(0,10);
+
+          localStorage.setItem("qrHistory",JSON.stringify(history));
+          renderHistory();
+        }
+      }catch(error){
+        console.error(error);
+        $("status").textContent="Could not generate this QR code.";
+      }
+    }
+
+    function escapeHtml(value){
+      return String(value).replace(/[&<>"']/g,char=>({
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        '"':"&quot;",
+        "'":"&#039;"
+      })[char]);
+    }
+
+    function renderHistory(){
+      const history=JSON.parse(localStorage.getItem("qrHistory")||"[]");
+
+      if(!history.length){
+        $("historyList").innerHTML='<div class="empty">No QR codes generated yet.</div>';
+        return;
+      }
+
+      $("historyList").innerHTML=history.map((item,index)=>`
+        <div class="history-item">
+          <div class="history-text">${item.type.toUpperCase()} — ${escapeHtml(item.data)}</div>
+          <button class="secondary" data-index="${index}">Open</button>
+        </div>
+      `).join("");
+
+      document.querySelectorAll("[data-index]").forEach(button=>{
+        button.addEventListener("click",async()=>{
+          const item=history[Number(button.dataset.index)];
+          currentType=item.type;
+
+          document.querySelectorAll(".tab").forEach(tab=>{
+            tab.classList.toggle("active",tab.dataset.type===currentType);
+          });
+
+          renderFields();
+
+          if(currentType==="text") $("textValue").value=item.data;
+          if(currentType==="url") $("urlValue").value=item.data;
+          if(currentType==="phone") $("phoneValue").value=item.data.replace(/^tel:/,"");
+
+          await generateQR(false);
+          window.scrollTo({top:0,behavior:"smooth"});
+        });
+      });
+    }
+
+    document.querySelectorAll(".tab").forEach(tab=>{
+      tab.addEventListener("click",()=>{
+        currentType=tab.dataset.type;
+
+        document.querySelectorAll(".tab").forEach(item=>item.classList.remove("active"));
+        tab.classList.add("active");
+
+        renderFields();
+        generateQR(false);
+      });
+    });
+
+    $("sizeRange").addEventListener("input",()=>{
+      $("sizeValue").textContent=$("sizeRange").value;
+      generateQR(false);
+    });
+
+    ["errorLevel","darkColor","lightColor"].forEach(id=>{
+      $(id).addEventListener("input",()=>generateQR(false));
+      $(id).addEventListener("change",()=>generateQR(false));
+    });
+
+    $("generateButton").addEventListener("click",()=>generateQR(true));
+
+    $("downloadButton").addEventListener("click",()=>{
+      const link=document.createElement("a");
+      link.download=`qr-code-${currentType}.png`;
+      link.href=$("qrCanvas").toDataURL("image/png");
+      link.click();
+    });
+
+    $("copyButton").addEventListener("click",async()=>{
+      try{
+        await navigator.clipboard.writeText(currentData);
+        $("status").textContent="QR content copied.";
+      }catch{
+        $("status").textContent="Copy failed.";
+      }
+    });
+
+    $("clearHistory").addEventListener("click",()=>{
+      localStorage.removeItem("qrHistory");
+      renderHistory();
+    });
+
+    $("themeButton").addEventListener("click",()=>{
+      const dark=document.documentElement.dataset.theme==="dark";
+      document.documentElement.dataset.theme=dark?"":"dark";
+      $("themeButton").textContent=dark?"🌙":"☀️";
+      localStorage.setItem("qrTheme",dark?"light":"dark");
+    });
+
+    if(localStorage.getItem("qrTheme")==="dark"){
+      document.documentElement.dataset.theme="dark";
+      $("themeButton").textContent="☀️";
+    }
+
+    renderFields();
+    renderHistory();
+    generateQR(false);
+  </script>
+</body>
+</html>
